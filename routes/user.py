@@ -1,46 +1,31 @@
-from flask import Blueprint, request, jsonify
-from models import db, User
+from flask import Blueprint, jsonify, request
+from controllers.userController import get_all_users, create_user, update_user, delete_user
 
-user_bp = Blueprint('user', __name__)
+user_bp = Blueprint('users', __name__)
 
 @user_bp.route('/', methods=['GET'])
-def get_users():
-    users = User.query.all()
-    return jsonify([user.to_dict() for user in users])
-
-@user_bp.route('/<int:id>', methods=['GET'])
-def get_user(id):
-    user = User.query.get(id)
-    if user:
-        return jsonify(user.to_dict())
-    return jsonify({"message": "User not found"}), 404
+def index():
+    user = get_all_users()
+    return jsonify(user)
 
 @user_bp.route('/', methods=['POST'])
-def create_user():
+def user_store():
     data = request.get_json()
-    new_user = User(name=data['name'], email=data['email'])
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify(new_user.to_dict()), 201
+    email = data.get('email') 
+    name = data.get('name')
+    print(f"NAME {name} --- email {email}")
+    new_user = create_user(name, email)
+    return jsonify(new_user)
 
-@user_bp.route('/<int:id>', methods=['PUT'])
-def update_user(id):
-    user = User.query.get(id)
-    if user:
-        data = request.get_json()
-        user.name = data['name']
-        user.email = data['email']
-        db.session.commit()
-        return jsonify(user.to_dict())
-    return jsonify({"message": "User not found"}), 404
+@user_bp.route('/<int:user_id>', methods=['PUT'])
+def user_update(user_id):
+    data = request.get_json()
+    name = data.get('name')
+    email = data.get('email')
+    updated_user = update_user(user_id, name, email)
+    return jsonify(updated_user)
 
-@user_bp.route('/<int:id>', methods=['DELETE'])
-def delete_user(id):
-    user = User.query.get(id)
-    if user:
-        db.session.delete(user)
-        db.session.commit()
-        return jsonify({"message": "User deleted successfully"})
-    return jsonify({"message": "User not found"}), 404
-
-
+@user_bp.route('/<int:user_id>', methods=['DELETE'])
+def user_delete(user_id):
+    deleted_user = delete_user(user_id)
+    return jsonify(deleted_user)

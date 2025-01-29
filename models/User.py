@@ -5,7 +5,7 @@ class User(db.Model):
     name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(50), unique=True, nullable=False)
     
-    def __init__(self, name, email):  # Asegúrate de tener los parámetros en el constructor
+    def __init__(self, name, email): 
         self.name = name
         self.email = email
     
